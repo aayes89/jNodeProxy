@@ -14,6 +14,7 @@ app.get('/', (req, res) => {
     includeImages: req.query.includeImages || '',
     includeCss: req.query.includeCss || ''
   });
+
   const proxyUrl = `/proxy?url=${encodeURIComponent(req.query.url || '')}&${query}`;
 
   const includeJsChecked = req.query.includeJs ? 'checked' : '';
@@ -23,8 +24,8 @@ app.get('/', (req, res) => {
   res.send(`
     <div style="background-color: #f2f2f2; padding: 10px;">
       <form id="proxyForm" method="get" action="/">
-        <input type="text" id="url" name="url" value="${req.query.url || ''}">
         <label for="url">URL:</label>
+        <input type="text" id="url" name="url" value="${req.query.url || ''}">
         <br>
         <label for="includeJs">Incluir JS:</label>
         <input type="checkbox" id="includeJs" name="includeJs" ${includeJsChecked}>
@@ -58,7 +59,7 @@ app.get('/', (req, res) => {
       // Escuchar eventos de carga en el iframe para manipular los videos de YouTube
       proxyFrame.addEventListener('load', () => {
         const iframeDoc = proxyFrame.contentDocument || proxyFrame.contentWindow.document;
-        const videoContainers = iframeDoc.querySelectorAll('div.html5-video-container');
+        const videoContainers = iframeDoc.querySelectorAll('#container.html5-video-player');
 
         videoContainers.forEach((container) => {
           const videoElement = container.querySelector('video');
@@ -66,7 +67,7 @@ app.get('/', (req, res) => {
             const src = videoElement.getAttribute('src');
             if (src && src.startsWith('blob:')) {
               const youtubeEmbedUrl = 'https://www.youtube.com/embed/' + getYouTubeVideoIdFromUrl(src);
-              videoElement.replaceWith(`<iframe src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`);
+              videoElement.parentElement.innerHTML = `<iframe src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
             }
           }
         });
