@@ -23,8 +23,9 @@ app.get('/', (req, res) => {
   res.send(`
     <div style="background-color: #f2f2f2; padding: 10px;">
       <form id="proxyForm" method="get" action="/">
-        <label for="url">URL:</label>
         <input type="text" id="url" name="url" value="${req.query.url || ''}">
+        <label for="url">URL:</label>
+        <br>
         <label for="includeJs">Incluir JS:</label>
         <input type="checkbox" id="includeJs" name="includeJs" ${includeJsChecked}>
         <label for="includeImages">Incluir Imágenes:</label>
@@ -53,6 +54,30 @@ app.get('/', (req, res) => {
         const newProxyUrl = '/proxy?url=' + newUrl + '&' + query;
         proxyFrame.src = newProxyUrl;
       });
+
+      // Escuchar eventos de carga en el iframe para manipular los videos de YouTube
+      proxyFrame.addEventListener('load', () => {
+        const iframeDoc = proxyFrame.contentDocument || proxyFrame.contentWindow.document;
+        const videoContainers = iframeDoc.querySelectorAll('div.html5-video-container');
+
+        videoContainers.forEach((container) => {
+          const videoElement = container.querySelector('video');
+          if (videoElement) {
+            const src = videoElement.getAttribute('src');
+            if (src && src.startsWith('blob:')) {
+              const youtubeEmbedUrl = 'https://www.youtube.com/embed/' + getYouTubeVideoIdFromUrl(src);
+              videoElement.replaceWith(`<iframe src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`);
+            }
+          }
+        });
+      });
+
+      // Función para extraer el ID de video de una URL de YouTube
+      function getYouTubeVideoIdFromUrl(url) {
+        const regex = /[?&]v=([^&#]*)/;
+        const match = regex.exec(url);
+        return match && match[1] ? match[1] : '';
+      }
     </script>
   `);
 });
