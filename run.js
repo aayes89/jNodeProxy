@@ -67,7 +67,7 @@ app.get('/', (req, res) => {
             const src = videoElement.getAttribute('src');
             if (src && src.startsWith('blob:')) {
               const youtubeEmbedUrl = 'https://www.youtube.com/embed/' + getYouTubeVideoIdFromUrl(src);
-              videoElement.parentElement.innerHTML = `<iframe src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
+              videoElement.parentElement.innerHTML = '<iframe src="' + youtubeEmbedUrl + '" frameborder="0" allowfullscreen></iframe>';
             }
           }
         });
